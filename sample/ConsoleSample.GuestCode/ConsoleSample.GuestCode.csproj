@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Loaded into the WebAssembly guest, which ships a net10.0 BCL via the new
-         Microsoft.NET.Runtime.WebAssembly.Wasi.Sdk 10.0.7. Keep this assembly net10.0-compatible to
-         avoid TypeRef resolution failures in the guest. -->
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- Loaded into the WebAssembly guest, which ships a net7.0 BCL via Wasi.Sdk. Keep this assembly
+         net7.0-compatible to avoid TypeRef resolution failures in the guest. -->
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

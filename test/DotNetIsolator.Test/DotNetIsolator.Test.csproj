@@ -2,9 +2,11 @@
 
 	<PropertyGroup>
 		<!-- The test assembly is loaded *into the WebAssembly guest* via WithBinDirectoryAssemblyLoader,
-		     and that guest runtime ships a net10.0 BCL (Microsoft.NET.Runtime.WebAssembly.Wasi.Sdk 10.0.7).
-		     So this DLL must stay net10.0-compatible to avoid TypeRef resolution failures inside the guest. -->
-		<TargetFramework>net10.0</TargetFramework>
+		     and that guest runtime ships a net7.0 BCL (pinned by Wasi.Sdk 0.1.4-preview). So this DLL
+		     must stay net7.0-compatible to avoid TypeRef resolution failures inside the guest. We use
+		     RollForward=LatestMajor so the test process itself can still run on the installed .NET 10 runtime. -->
+		<TargetFramework>net7.0</TargetFramework>
+		<RollForward>LatestMajor</RollForward>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>

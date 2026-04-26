@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <wasm/driver.h>
+#include <mono-wasi/driver.h>
 
 __attribute__((import_module("dotnetisolator")))
 __attribute__((import_name("call_host")))

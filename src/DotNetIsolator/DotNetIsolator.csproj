@@ -1,18 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!-- Targets net10.0 only. The previous net7.0 multi-target was kept so that consumers whose DLLs
-		     ran in the Wasi.Sdk 0.1.4-preview guest (which had a net7.0 BCL) could still reference this
-		     library; the new Microsoft.NET.Runtime.WebAssembly.Wasi.Sdk 10.0.7 ships a net10.0 guest BCL,
-		     so net7.0 is no longer reachable from the guest and the multi-target rationale is gone. -->
-		<TargetFramework>net10.0</TargetFramework>
+		<!-- Multi-targeted: net10.0 for production hosts on the modern runtime, net7.0 retained so that
+		     consumers whose own DLLs are loaded *into the WebAssembly guest* (which ships a net7.0 BCL)
+		     can still reference us. C# 14 language features work in both via LangVersion=latest. -->
+		<TargetFrameworks>net7.0;net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<WasmAppProjectName>DotNetIsolator.WasmApp</WasmAppProjectName>
-		<!-- The WasmApp project is pinned to net10.0 because Microsoft.NET.Runtime.WebAssembly.Wasi.Sdk 10.0.7
-		     only ships a net10.0 runtime pack for wasi-wasm. We hardcode that TFM here so the wasm/.dll
-		     bundling paths resolve correctly even though this host library is multi-targeted. -->
-		<WasmAppTargetFramework>net10.0</WasmAppTargetFramework>
+		<!-- The WasmApp project is intentionally pinned to net7.0 because it depends on Wasi.Sdk 0.1.4-preview,
+		     which only ships a net7.0 runtime pack. We hardcode that TFM here so the wasm/.dll bundling paths
+		     resolve correctly even though this host library is multi-targeted to a newer .NET. -->
+		<WasmAppTargetFramework>net7.0</WasmAppTargetFramework>
 		<BundledFilesDir>IsolatedRuntimeHost\</BundledFilesDir>
 		<BundledWasmAssembliesDir>$(BundledFilesDir)WasmAssemblies\</BundledWasmAssembliesDir>
 		<NoWarn>$(NoWarn);NU5100</NoWarn> <!-- We're bundling some .dlls as content, so don't warn about them not being in lib -->
@@ -34,15 +33,12 @@
 	</ItemGroup>
 
 	<!-- Reference the WasmApp project in such a way that we acquire its .wasm and WebAssembly BCL (.dll) files, but not its primary assembly -->
-	<ItemGroup>
+	<ItemGroup>		
 		<ProjectReference Include="..\DotNetIsolator.WasmApp\DotNetIsolator.WasmApp.csproj">
 		  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		  <SetTargetFramework>TargetFramework=$(WasmAppTargetFramework)</SetTargetFramework>
 		</ProjectReference>
-		<!-- The new Wasi.Sdk emits the (single-file) wasm at
-		     bin\<cfg>\<tfm>\wasi-wasm\AppBundle\<MainAssemblyName>.wasm. The 'wasi-wasm' segment is
-		     appended automatically because the WasmApp project sets RuntimeIdentifier=wasi-wasm. -->
-		<Content Include="..\$(WasmAppProjectName)\bin\$(Configuration)\$(WasmAppTargetFramework)\wasi-wasm\AppBundle\$(WasmAppProjectName).wasm">
+		<Content Include="..\$(WasmAppProjectName)\bin\$(Configuration)\$(WasmAppTargetFramework)\$(WasmAppProjectName).wasm">
 			<Visible>false</Visible>
 			<Link>$(BundledFilesDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

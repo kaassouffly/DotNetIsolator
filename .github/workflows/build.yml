@@ -20,22 +20,27 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
-    - name: Install wasi-sdk 25.0
+    - name: Install wasm-opt
       run: |
-        mkdir wasi-sdk
-        cd wasi-sdk
-        wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-25/wasi-sdk-25.0-x86_64-linux.tar.gz
-        tar xf wasi-sdk-*.tar.gz --strip-components 1
-        echo "WASI_SDK_PATH=$PWD" >> $GITHUB_ENV
-        echo Set WASI_SDK_PATH to $PWD
+        mkdir binaryen
+        cd binaryen
+        wget https://github.com/WebAssembly/binaryen/releases/download/version_112/binaryen-version_112-x86_64-linux.tar.gz
+        tar xf binaryen-*.tar.gz --strip-components 1
+        cd bin
+        echo $PWD >> $GITHUB_PATH
+        echo Added $PWD to path
+    - name: Install wizer
+      run: |
+        mkdir wizer
+        cd wizer
+        wget https://github.com/bytecodealliance/wizer/releases/download/v1.6.0/wizer-v1.6.0-x86_64-linux.tar.xz
+        tar xf wizer-*.tar.xz --strip-components 1
+        echo $PWD >> $GITHUB_PATH
+        echo Added $PWD to path
     - name: Install wasi-experimental workload
       run: dotnet workload install wasi-experimental
     - name: .NET restore
       run: dotnet restore
-    - name: Publish DotNetIsolator.WasmApp
-      # The new Microsoft.NET.Runtime.WebAssembly.Wasi.Sdk only emits the trimmed single-file .wasm
-      # during 'Publish'; the host's BuildWasmAppForPublish target depends on this output existing.
-      run: dotnet publish src/DotNetIsolator.WasmApp -c Release --no-restore
     - name: .NET test
       run: dotnet test test/DotNetIsolator.Test --no-restore --verbosity normal
     - name: .NET pack
