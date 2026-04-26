@@ -1,4 +1,4 @@
-#include <mono-wasi/driver.h>
+#include <wasm/driver.h>
 #include <mono/metadata/class.h>
 #include <string.h>
 #include <assert.h>
