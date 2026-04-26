@@ -1,8 +1,3 @@
 ﻿namespace DotNetIsolator;
 
-public class IsolatedException : Exception
-{
-    public IsolatedException(string? message) : base(message)
-    {
-    }
-}
+public class IsolatedException(string? message) : Exception(message);

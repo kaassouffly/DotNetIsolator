@@ -1,24 +1,20 @@
 ﻿namespace DotNetIsolator;
 
-public class IsolatedObject
+public class IsolatedObject(
+    IsolatedRuntime runtimeInstance,
+    int gcHandle,
+    string assemblyName,
+    string? @namespace,
+    string? declaringTypeName,
+    string typeName)
 {
-    private readonly IsolatedRuntime _runtimeInstance;
-    private readonly string _assemblyName;
-    private readonly string? _namespace;
-    private readonly string? _declaringTypeName;
-    private readonly string _typeName;
+    private readonly IsolatedRuntime _runtimeInstance = runtimeInstance;
+    private readonly string _assemblyName = assemblyName;
+    private readonly string? _namespace = @namespace;
+    private readonly string? _declaringTypeName = declaringTypeName;
+    private readonly string _typeName = typeName;
 
-    internal IsolatedObject(IsolatedRuntime runtimeInstance, int gcHandle, string assemblyName, string? @namespace, string? declaringTypeName, string typeName)
-    {
-        _runtimeInstance = runtimeInstance;
-        GuestGCHandle = gcHandle;
-        _assemblyName = assemblyName;
-        _namespace = @namespace;
-        _declaringTypeName = declaringTypeName;
-        _typeName = typeName;
-    }
-
-    internal int GuestGCHandle { get; private set; }
+    internal int GuestGCHandle { get; private set; } = gcHandle;
 
     public IsolatedMethod FindMethod(string methodName, int numArgs = -1)
     {

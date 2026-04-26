@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '7.0.x' ]
+        dotnet-version: [ '10.0.x' ]
     steps:
     - name: Get package version suffix
       run: echo "PACKAGE_VERSION_SUFFIX=preview.$(printf $((${{ github.run_number }}+10000)))" >> $GITHUB_ENV
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
     - name: Install wasm-opt
@@ -46,7 +46,7 @@ jobs:
         dotnet pack src/DotNetIsolator -c Release --no-restore /p:VersionSuffix=${{ env.PACKAGE_VERSION_SUFFIX }}
         dotnet pack src/DotNetIsolator.Guest -c Release --no-restore /p:VersionSuffix=${{ env.PACKAGE_VERSION_SUFFIX }}
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: nuget-packages
         path: artifacts/*.nupkg

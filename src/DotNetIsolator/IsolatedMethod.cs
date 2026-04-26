@@ -2,19 +2,12 @@
 
 namespace DotNetIsolator;
 
-public class IsolatedMethod
+public class IsolatedMethod(IsolatedRuntime runtimeInstance, string name, int monoMethodPtr)
 {
-    private readonly IsolatedRuntime _runtimeInstance;
-    private readonly int _monoMethodPtr;
+    private readonly IsolatedRuntime _runtimeInstance = runtimeInstance;
+    private readonly int _monoMethodPtr = monoMethodPtr;
 
-    public string Name { get; }
-
-    internal IsolatedMethod(IsolatedRuntime runtimeInstance, string name, int monoMethodPtr)
-    {
-        Name = name;
-        _runtimeInstance = runtimeInstance;
-        _monoMethodPtr = monoMethodPtr;
-    }
+    public string Name { get; } = name;
 
     public TRes Invoke<TRes>(IsolatedObject? instance)
         => _runtimeInstance.InvokeDotNetMethod<TRes>(_monoMethodPtr, instance, Span<int>.Empty);
