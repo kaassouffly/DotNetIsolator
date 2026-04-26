@@ -209,7 +209,7 @@ isolatedObject.InvokeVoid("DoSomething", 123);
 If it has a return value, you must specify the type as a generic parameter. For example, if the object has a method `TimeSpan GetAge(bool includeGestation)`:
 
 ```cs
-TimeSpan result = isolatedObject.Invoke<bool, TimeSpan>("GetAge", /* includeGestation */ true);
+TimeSpan result = isolatedObject.Invoke<TimeSpan>("GetAge", /* includeGestation */ true);
 ```
 
 Alternatively you can capture a reference to an `IsolateMethod` so you can invoke it later. This is similar to a `MethodInfo` so it isn't bound to a specific target object.
@@ -218,7 +218,7 @@ Alternatively you can capture a reference to an `IsolateMethod` so you can invok
 var getAgeMethod = isolatedObject.FindMethod("GetAge");
 
 // ... then later:
-var age = getAgeMethod.Invoke<bool, TimeSpan>(isolatedObject, /* includeGestation */ true);
+var age = getAgeMethod.Invoke<TimeSpan>(isolatedObject, /* includeGestation */ true);
 ```
 
 You can also find methods without having to instantiate any objects first:

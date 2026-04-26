@@ -26,41 +26,13 @@ public class IsolatedObject(
         return _runtimeInstance.GetMethod(_assemblyName, _namespace, _declaringTypeName, _typeName, methodName);
     }
 
-    public TRes Invoke<TRes>(string methodName)
-        => FindMethod(methodName, 0).Invoke<TRes>(this);
+    // Single arity-agnostic core. Replaces the previous five Invoke<T0..T4,TRes>
+    // and five InvokeVoid<T0..T4> overloads with a params object?[] core.
+    public TRes Invoke<TRes>(string methodName, params object?[] args)
+        => FindMethod(methodName, args.Length).Invoke<TRes>(this, args);
 
-    public TRes Invoke<T0, TRes>(string methodName, T0 param0)
-        => FindMethod(methodName, 1).Invoke<T0, TRes>(this, param0);
-
-    public TRes Invoke<T0, T1, TRes>(string methodName, T0 param0, T1 param1)
-        => FindMethod(methodName, 2).Invoke<T0, T1, TRes>(this, param0, param1);
-
-    public TRes Invoke<T0, T1, T2, TRes>(string methodName, T0 param0, T1 param1, T2 param2)
-        => FindMethod(methodName, 3).Invoke<T0, T1, T2, TRes>(this, param0, param1, param2);
-
-    public TRes Invoke<T0, T1, T2, T3, TRes>(string methodName, T0 param0, T1 param1, T2 param2, T3 param3)
-        => FindMethod(methodName, 4).Invoke<T0, T1, T2, T3, TRes>(this, param0, param1, param2, param3);
-
-    public TRes Invoke<T0, T1, T2, T3, T4, TRes>(string methodName, T0 param0, T1 param1, T2 param2, T3 param3, T4 param4)
-        => FindMethod(methodName, 5).Invoke<T0, T1, T2, T3, T4, TRes>(this, param0, param1, param2, param3, param4);
-
-    public void InvokeVoid(string methodName)
-        => FindMethod(methodName, 0).InvokeVoid(this);
-
-    public void InvokeVoid<T0>(string methodName, T0 param0)
-        => FindMethod(methodName, 1).InvokeVoid(this, param0);
-
-    public void InvokeVoid<T0, T1>(string methodName, T0 param0, T1 param1)
-        => FindMethod(methodName, 2).InvokeVoid(this, param0, param1);
-
-    public void InvokeVoid<T0, T1, T2>(string methodName, T0 param0, T1 param1, T2 param2)
-        => FindMethod(methodName, 3).InvokeVoid(this, param0, param1, param2);
-
-    public void InvokeVoid<T0, T1, T2, T3>(string methodName, T0 param0, T1 param1, T2 param2, T3 param3)
-        => FindMethod(methodName, 4).InvokeVoid(this, param0, param1, param2, param3);
-
-    public void InvokeVoid<T0, T1, T2, T3, T4>(string methodName, T0 param0, T1 param1, T2 param2, T3 param3, T4 param4)
-        => FindMethod(methodName, 5).InvokeVoid(this, param0, param1, param2, param3, param4);
+    public void InvokeVoid(string methodName, params object?[] args)
+        => FindMethod(methodName, args.Length).InvokeVoid(this, args);
 
     public void ReleaseGCHandle()
     {
