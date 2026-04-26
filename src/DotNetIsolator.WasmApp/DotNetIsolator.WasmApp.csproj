@@ -64,7 +64,7 @@
 	target and resolves to e.g.
 	  packs/Microsoft.NETCore.App.Runtime.Mono.wasi-wasm/10.0.7/runtimes/wasi-wasm/lib/net10.0/
 	-->
-	<Target Name="GetWasiRuntimePackAssemblies" Outputs="@(WasiRuntimePackAssemblies)" DependsOnTargets="ResolveRuntimePackAssets;_InitializeCommonProperties">
+	<Target Name="GetWasiRuntimePackAssemblies" Outputs="@(WasiRuntimePackAssemblies)" DependsOnTargets="ResolveRuntimePackAssets">
 		<ItemGroup>
 			<WasiRuntimePackAssemblies Include="$(MicrosoftNetCoreAppRuntimePackRidLibTfmDir)\*.dll" />
 		</ItemGroup>

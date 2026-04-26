@@ -21,7 +21,7 @@
 	<ItemGroup>
 		<!-- 2.5.187+ fixes GHSA-4qm4-8hg2-g2xm. -->
 		<PackageReference Include="MessagePack" Version="2.5.187" />
-		<PackageReference Include="Wasmtime" Version="5.0.0" />
+		<PackageReference Include="Wasmtime" Version="34.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>
