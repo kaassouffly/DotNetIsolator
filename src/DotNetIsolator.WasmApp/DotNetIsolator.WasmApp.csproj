@@ -9,7 +9,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MessagePack" Version="2.5.103" />
+		<!-- 2.5.187+ fixes GHSA-4qm4-8hg2-g2xm. -->
+		<PackageReference Include="MessagePack" Version="2.5.187" />
 		<PackageReference Include="Wasi.Sdk" Version="0.1.4-preview.10020" />
 	</ItemGroup>
 

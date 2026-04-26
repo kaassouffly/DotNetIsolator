@@ -8,7 +8,7 @@ public class IsolatedRuntimeHost : IDisposable
     private readonly static string _wasmBclDir;
     
     private WasiConfiguration? _wasiConfiguration;
-    private List<AssemblyLoadCallback> _assemblyLoaders = new();
+    private List<AssemblyLoadCallback> _assemblyLoaders = [];
 
     static IsolatedRuntimeHost()
     {

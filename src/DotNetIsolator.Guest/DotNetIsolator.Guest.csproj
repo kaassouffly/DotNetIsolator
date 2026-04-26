@@ -1,14 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<!-- Multi-targeted because guest code (which references this package) must remain net7.0-compatible
+		     to be loadable by the WASM guest's net7.0 BCL. -->
+		<TargetFrameworks>net7.0;net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MessagePack" Version="2.5.103" />
+		<!-- 2.5.187+ fixes GHSA-4qm4-8hg2-g2xm. -->
+		<PackageReference Include="MessagePack" Version="2.5.187" />
 	</ItemGroup>
 
 </Project>

@@ -29,27 +29,27 @@ public class MethodInvocationTest : IDisposable
     [Fact]
     public void CanInvokeIntParamMethod()
         => Assert.Equal(246, _runtime.CreateObject<TestClass>()
-            .Invoke<int, int>(nameof(TestClass.IntParamMethod), 123));
+            .Invoke<int>(nameof(TestClass.IntParamMethod), 123));
 
     [Fact]
     public void CanInvokeBoolParamMethod()
     {
         var obj = _runtime.CreateObject<TestClass>();
-        Assert.True(obj.Invoke<bool, bool>(nameof(TestClass.BoolParamMethod), true));
-        Assert.False(obj.Invoke<bool, bool>(nameof(TestClass.BoolParamMethod), false));
+        Assert.True(obj.Invoke<bool>(nameof(TestClass.BoolParamMethod), true));
+        Assert.False(obj.Invoke<bool>(nameof(TestClass.BoolParamMethod), false));
     }
 
     [Fact]
     public void CanInvokeStringParamMethod()
         => Assert.Equal("HELLO WORLD", _runtime.CreateObject<TestClass>()
-            .Invoke<string, string>(nameof(TestClass.StringParamMethod), "Hello world"));
+            .Invoke<string>(nameof(TestClass.StringParamMethod), "Hello world"));
 
     [Fact]
     public void CanInvokeComplexParamMethod()
     {
         var paramValue = TestClass.MyComplexObject.CreateTestValue();
         var target = _runtime.CreateObject<TestClass>();
-        var returnValue = target.Invoke<TestClass.MyComplexObject, string>(nameof(TestClass.ComplexParamMethod), paramValue);
+        var returnValue = target.Invoke<string>(nameof(TestClass.ComplexParamMethod), paramValue);
         Assert.Equal(paramValue.ToString().Replace("\r\n", "\n"), returnValue);
     }
 
@@ -65,7 +65,7 @@ public class MethodInvocationTest : IDisposable
     [Fact]
     public void CanInvokeMultipleParamsMethod()
         => Assert.Equal("[a=123][b=True][c=Hello]", _runtime.CreateObject<TestClass>()
-            .Invoke<int, bool, string, string>(nameof(TestClass.SimpleParamsMethod), 123, true, "Hello"));
+            .Invoke<string>(nameof(TestClass.SimpleParamsMethod), 123, true, "Hello"));
 
     [Fact]
     public void GuestExceptionsSurfaceInHost()

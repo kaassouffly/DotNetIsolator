@@ -6,5 +6,9 @@
         <Authors>Steve Sanderson</Authors>
         <Company>Microsoft</Company>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <!-- Opt every project in this folder tree into the latest C# compiler so we can use C# 14 features
+             (extension members, field-backed properties, collection expressions, etc.) regardless of the
+             individual project's TargetFramework. -->
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 </Project>

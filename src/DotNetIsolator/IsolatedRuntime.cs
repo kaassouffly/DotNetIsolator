@@ -26,9 +26,9 @@ public class IsolatedRuntime : IDisposable
     private readonly Func<int, int, int> _deserializeAsDotNetObject;
     private readonly Action<int> _invokeDotNetMethod;
     private readonly Action<int> _releaseObject;
-    private readonly ConcurrentDictionary<(string AssemblyName, string? Namespace, string TypeName, string MethodName, int NumArgs), IsolatedMethod> _methodLookupCache = new();
+    private readonly ConcurrentDictionary<(string AssemblyName, string? Namespace, string TypeName, string MethodName, int NumArgs), IsolatedMethod> _methodLookupCache = [];
     private readonly ShadowStack _shadowStack;
-    private readonly Dictionary<string, Delegate> _registeredCallbacks = new();
+    private readonly Dictionary<string, Delegate> _registeredCallbacks = [];
     private bool _isDisposed;
 
     public IsolatedRuntime(IsolatedRuntimeHost host)
@@ -39,21 +39,14 @@ public class IsolatedRuntime : IDisposable
 
         _store = store;
         _instance = host.Linker.Instantiate(store, host.Module);
-        _memory = _instance.GetMemory("memory") ?? throw new InvalidOperationException("Couldn't find memory 'memory'");
-        _malloc = _instance.GetFunction<int, int>("malloc")
-            ?? throw new InvalidOperationException("Missing required export 'malloc'");
-        _free = _instance.GetAction<int>("free")
-            ?? throw new InvalidOperationException("Missing required export 'free'");
-        _instantiateDotNetClass = _instance.GetFunction<int, int, int, int, int>("dotnetisolator_instantiate_class")
-            ?? throw new InvalidOperationException("Missing required export 'dotnetisolator_instantiate_class'");
-        _lookupDotNetMethod = _instance.GetFunction<int, int, int, int, int, int, int>("dotnetisolator_lookup_method")
-            ?? throw new InvalidOperationException("Missing required export 'dotnetisolator_lookup_method'");
-        _deserializeAsDotNetObject = _instance.GetFunction<int, int, int>("dotnetisolator_deserialize_object")
-            ?? throw new InvalidOperationException("Missing required export 'dotnetisolator_deserialize_object'");
-        _invokeDotNetMethod = _instance.GetAction<int>("dotnetisolator_invoke_method")
-            ?? throw new InvalidOperationException("Missing required export 'dotnetisolator_invoke_method'");
-        _releaseObject = _instance.GetAction<int>("dotnetisolator_release_object")
-            ?? throw new InvalidOperationException("Missing required export 'dotnetisolator_release_object'");
+        _memory = _instance.RequireMemory("memory");
+        _malloc = _instance.RequireFunction<int, int>("malloc");
+        _free = _instance.RequireAction<int>("free");
+        _instantiateDotNetClass = _instance.RequireFunction<int, int, int, int, int>("dotnetisolator_instantiate_class");
+        _lookupDotNetMethod = _instance.RequireFunction<int, int, int, int, int, int, int>("dotnetisolator_lookup_method");
+        _deserializeAsDotNetObject = _instance.RequireFunction<int, int, int>("dotnetisolator_deserialize_object");
+        _invokeDotNetMethod = _instance.RequireAction<int>("dotnetisolator_invoke_method");
+        _releaseObject = _instance.RequireAction<int>("dotnetisolator_release_object");
 
         _shadowStack = new ShadowStack(_memory, _malloc, _free);
 
@@ -80,26 +73,20 @@ public class IsolatedRuntime : IDisposable
 
     public IsolatedObject CreateObject(string assemblyName, string? @namespace, string? declaringTypeName, string className)
     {
-        var errorMessageParam = _shadowStack.Push<int>();
-        try
-        {
-            // All these CopyValue strings are freed inside the C code
-            var monoClassName = declaringTypeName is null ? className : $"{declaringTypeName}/{className}";
-            var gcHandle = _instantiateDotNetClass(CopyValue(assemblyName), CopyValue(@namespace), CopyValue(monoClassName), errorMessageParam.Address);
+        using var errorMessageParam = _shadowStack.Push<int>();
 
-            if (errorMessageParam.Value != 0)
-            {
-                var errorString = _memory.ReadNullTerminatedString(errorMessageParam.Value);
-                _free(errorMessageParam.Value);
-                throw new IsolatedException(errorString);
-            }
+        // All these CopyValue strings are freed inside the C code
+        var monoClassName = declaringTypeName is null ? className : $"{declaringTypeName}/{className}";
+        var gcHandle = _instantiateDotNetClass(CopyValue(assemblyName), CopyValue(@namespace), CopyValue(monoClassName), errorMessageParam.Address);
 
-            return new IsolatedObject(this, gcHandle, assemblyName, @namespace, declaringTypeName, className);
-        }
-        finally
+        if (errorMessageParam.Value != 0)
         {
-            errorMessageParam.Pop();
+            var errorString = _memory.ReadNullTerminatedString(errorMessageParam.Value);
+            _free(errorMessageParam.Value);
+            throw new IsolatedException(errorString);
         }
+
+        return new IsolatedObject(this, gcHandle, assemblyName, @namespace, declaringTypeName, className);
     }
 
     public IsolatedObject CreateObject<T>()
@@ -109,7 +96,7 @@ public class IsolatedRuntime : IDisposable
     {
         var serializedBytes = MessagePackSerializer.Typeless.Serialize(value);
         var serializedBytesAddress = CopyValueLengthPrefixed(serializedBytes);
-        var errorMessageBuf = _shadowStack.Push<int>();
+        using var errorMessageBuf = _shadowStack.Push<int>();
         try
         {
             var gcHandle = _deserializeAsDotNetObject(serializedBytesAddress, errorMessageBuf.Address);
@@ -124,7 +111,6 @@ public class IsolatedRuntime : IDisposable
         }
         finally
         {
-            errorMessageBuf.Pop();
             Free(serializedBytesAddress);
         }
     }
@@ -187,31 +173,25 @@ public class IsolatedRuntime : IDisposable
         {
             // All these CopyValue strings are freed inside the C code
             var monoClassName = declaringTypeName is null ? typeName : $"{declaringTypeName}/{typeName}";
-            
-            var errorMessageParam = _shadowStack.Push<int>();
-            try
-            {
-                var methodPtr = _lookupDotNetMethod(
-                    CopyValue(info.AssemblyName),
-                    CopyValue(info.Namespace),
-                    CopyValue(monoClassName),
-                    CopyValue(info.MethodName),
-                    info.NumArgs,
-                    errorMessageParam.Address);
 
-                if (errorMessageParam.Value != 0)
-                {
-                    var errorString = _memory.ReadNullTerminatedString(errorMessageParam.Value);
-                    _free(errorMessageParam.Value);
-                    throw new IsolatedException(errorString);
-                }
+            using var errorMessageParam = _shadowStack.Push<int>();
 
-                return new IsolatedMethod(this, info.MethodName, methodPtr);
-            }
-            finally
+            var methodPtr = _lookupDotNetMethod(
+                CopyValue(info.AssemblyName),
+                CopyValue(info.Namespace),
+                CopyValue(monoClassName),
+                CopyValue(info.MethodName),
+                info.NumArgs,
+                errorMessageParam.Address);
+
+            if (errorMessageParam.Value != 0)
             {
-                errorMessageParam.Pop();
+                var errorString = _memory.ReadNullTerminatedString(errorMessageParam.Value);
+                _free(errorMessageParam.Value);
+                throw new IsolatedException(errorString);
             }
+
+            return new IsolatedMethod(this, info.MethodName, methodPtr);
         });
     }
 
