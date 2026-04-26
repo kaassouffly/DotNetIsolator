@@ -3,9 +3,9 @@
 	<PropertyGroup>
 		<!-- Guest code that references this package is loaded *into the WASM guest*. The guest BCL is
 		     net10.0 (Microsoft.NET.Runtime.WebAssembly.Wasi.Sdk 10.0.7), so net10.0 is the lowest TFM
-		     guest code can target. The previous net7.0;net10.0 multi-target existed because the old
-		     Wasi.Sdk 0.1.4-preview shipped a net7.0 guest BCL; that rationale is gone. -->
-		<TargetFramework>net10.0</TargetFramework>
+		     guest code can target. We keep it multi-targeted only so net10.0-targeted *host*
+		     consumers can still reference this assembly. -->
+		<TargetFrameworks>net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
